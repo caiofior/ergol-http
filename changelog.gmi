@@ -1,0 +1,11 @@
+#  Ergol changelog
+
+## Version 0.4
+2021-03-12 15:50:00 UTC
+* shows relative image inline
+
+## Version 0.3
+2021-03-08 15:20:00 UTC
+* reply to /favicon.ico request and generate a png with TwitterColorEmoji-SVGinOT.ttf
+
+=> ../ergol.gmi Ergol page
