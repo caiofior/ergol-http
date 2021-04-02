@@ -14,3 +14,24 @@ ergol-http uses and provides a copy of Twitter Emoji aka twemoji packaged in a T
 
 Main repository on [Codeberg](https://codeberg.org/adele.work/ergol-http).
 
+
+ * ## If launched with internal php web server
+ * install ergol-http.php and style.css in an empty "http/" folder
+ * under folder containing ergol.json.
+ * Configuration in ergol.json file will be used (see ergol.gmi for details)
+ * Launch with : php -S 0.0.0.0:8080 -t ./ ./ergol-http.php
+ * 
+ * ## If launched from a webserver (with same hostname of gemini server),
+ * paste ergol-http.php into document root folder and rename it index.php.
+ * Install style.css in the same folder.
+ * Adapt ERGOL_JSON constant (see below)
+ * Then create a rewrite rule 
+ * Apache:
+ *   RewriteEngine on
+ *   RewriteRule   "^/(.*)"  "/?q=$1"  [R,L]
+ *
+ * lighttpd:
+ *   server.modules += ("mod_rewrite")
+ *   url.rewrite-once = ( "^/(.*)" => "/?q=/$1"  )
+ *
+ * gemini://adele.work/code/ergol/
