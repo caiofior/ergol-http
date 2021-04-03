@@ -1,7 +1,7 @@
 # ergol-http
 
 Ergol companion to serve #gemini capsules through http/https.
-It is a http wrapper written in php working with ergol gemini server or in standalone.
+It is a http wrapper written in php, working with ergol gemini server or standalone.
 
 ## Copyright
 
@@ -14,24 +14,38 @@ ergol-http uses and provides a copy of Twitter Emoji aka twemoji packaged in a T
 
 Main repository on [Codeberg](https://codeberg.org/adele.work/ergol-http).
 
+## Installation
 
- * ## If launched with internal php web server
- * install ergol-http.php and style.css in an empty "http/" folder
- * under folder containing ergol.json.
- * Configuration in ergol.json file will be used (see ergol.gmi for details)
- * Launch with : php -S 0.0.0.0:8080 -t ./ ./ergol-http.php
- * 
- * ## If launched from a webserver (with same hostname of gemini server),
- * paste ergol-http.php into document root folder and rename it index.php.
- * Install style.css in the same folder.
- * Adapt ERGOL_JSON constant (see below)
- * Then create a rewrite rule 
- * Apache:
- *   RewriteEngine on
- *   RewriteRule   "^/(.*)"  "/?q=$1"  [R,L]
- *
- * lighttpd:
- *   server.modules += ("mod_rewrite")
- *   url.rewrite-once = ( "^/(.*)" => "/?q=/$1"  )
- *
- * gemini://adele.work/code/ergol/
+Clone repository or unzip archive and copy main files in the document root of your website. Copy config-sample.php to config.php and change edit config.php to adapt it.
+```
+cd ~/
+git clone https://codeberg.org/adele.work/ergol-http.git
+cd ergol-http
+cp index.php style.css TwitterColorEmoji-SVGinOT.ttf .htaccess /var/www/
+cp config-sample.php /var/www/config.php
+nano /var/www/config.php
+```
+
+Web server needs to support url rewriting. Rule is present in .htaccess.
+
+In Apache config:
+```
+RewriteEngine on
+RewriteRule   "^/(.*)"  "/?q=$1"  [R,L]
+```
+
+In lighttpd config:
+```
+server.modules += ("mod_rewrite")
+url.rewrite-once = ( "^/(.*)" => "/?q=/$1"  )
+```
+
+It is also possible to run ergol-http with php embedded web server (not the recommended way).
+```
+php -S 0.0.0.0:8080 -t ./ ./index.php
+```
+
+## Upgrade
+
+Get the last version the same way as installation but do not overwrite your config.php, check if there are new constants in config-sample.php and add them into your config.php.
+

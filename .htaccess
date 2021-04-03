@@ -1,0 +1,2 @@
+RewriteEngine on
+RewriteRule   "^/(.*)"  "/?q=$1"  [R,L]
