@@ -3,6 +3,8 @@
 Ergol companion to serve #gemini capsules through http/https.
 It is a http wrapper written in php, working with ergol gemini server or standalone.
 
+![Screenshot of a web browser using ergol-http](ergol-http-screenshot.png)
+
 ## Copyright
 
 author : [Adële](https://adele.work/)
