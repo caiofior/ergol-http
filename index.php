@@ -366,7 +366,7 @@ function gmi2html($capsule, $body, $lang, $urlgem, $favicon)
 	  '.@file_get_contents(__DIR__.'/style.css').'
 	  </style>
 	</head>
-	<body>';
+	<body id="top">';
 	if(count($tocs)>1)
 	{
 		$html.= '<div class="toc" role="navigation">
@@ -377,10 +377,13 @@ function gmi2html($capsule, $body, $lang, $urlgem, $favicon)
 		</div>';
 	}
 	$html.= '
-	<label class="control">🔍 </label>
-	<input type="radio" name="check-size" class="control check-small" />
-	<input type="radio" name="check-size" class="control check-normal" checked="checked" />
-	<input type="radio" name="check-size" class="control check-big" />
+	<label class="control" for="check-smaller">🔍 -</label>
+	<input type="radio" name="check-size" id="check-smaller" class="control check-smaller" />
+	<input type="radio" name="check-size" id="check-small" class="control check-small" />
+	<input type="radio" name="check-size" id="check-normal" class="control check-normal" checked="checked" />
+	<input type="radio" name="check-size" id="check-big" class="control check-big" />
+	<input type="radio" name="check-size" id="check-bigger" class="control check-bigger" />
+	<label class="control" for="check-bigger">+</label>
 	<div class="main" role="article">
 	'.implode("\n",$lines).'
 	</div>

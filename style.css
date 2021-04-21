@@ -62,29 +62,23 @@ div.toc .l3  {
 	list-style-type: disc;
 }
 .control {
-  float: left;
-  margin: 4px;
+	float: left;
+	margin: 4px;
 }
-.check-small {
-  width: 16px;
-  height: 16px;
-}
-.check-normal {
-  width: 20px;
-  height: 20px;
-}
-.check-big {
-  width: 24px;
-  height: 24px;
+.check-bigger:checked ~ .main {
+	font-size: 150%;
 }
 .check-big:checked ~ .main {
-  font-size: 150%;
+	font-size: 120%;
 }
 .check-normal:checked ~ .main {
-  font-size: 100%;
+	font-size: 100%;
 }
 .check-small:checked ~ .main {
-  font-size: 70%;
+	font-size: 80%;
+}
+.check-smaller:checked ~ .main {
+	font-size: 50%;
 }
 div.inline-img img {
 	max-width: 100%;
