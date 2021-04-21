@@ -278,6 +278,10 @@ function gmi2html($capsule, $body, $lang, $urlgem, $favicon)
 {
 	$title='';
 	$lines=array();
+	$tocs=array();
+	$lev1=0;
+	$lev2=0;
+	$lev3=0;
 	$pre=false;
 	$glines = explode("\n", $body);
 	foreach($glines as $line)
@@ -311,13 +315,25 @@ function gmi2html($capsule, $body, $lang, $urlgem, $favicon)
 		switch($prefix)
 		{
 			case "#":
-				$lines[] = "<h1>".htmlentities(substr($line,1))."</h1>";
+				$lev1++;
+				$lev2=0;
+				$lev3=0;
+				$levid = $lev1;
+				$lines[] = '<h1 id="'.$levid.'">'.trim(htmlentities(substr($line,1))).'</h1>';
+				$tocs[] = '<li class="l1"><a href="#'.$levid.'">'.trim(htmlentities(substr($line,1))).'</a></li>';
 				break;
 			case "##":
-				$lines[] = "<h2>".htmlentities(substr($line,2))."</h2>";
+				$lev2++;
+				$lev3=0;
+				$levid = $lev1.'-'.$lev2;
+				$lines[] = '<h1 id="'.$levid.'">'.trim(htmlentities(substr($line,2))).'</h1>';
+				$tocs[] = '<li class="l2"><a href="#'.$levid.'">'.trim(htmlentities(substr($line,2))).'</a></li>';
 				break;
 			case "###":
-				$lines[] = "<h3>".htmlentities(substr($line,3))."</h3>";
+				$lev3++;
+				$levid = $lev1.'-'.$lev2.'-'.$lev3;
+				$lines[] = '<h1 id="'.$levid.'">'.trim(htmlentities(substr($line,3))).'</h1>';
+				$tocs[] = '<li class="l3"><a href="#'.$levid.'">'.trim(htmlentities(substr($line,3))).'</a></li>';
 				break;
 			case ">":
 				$lines[] = "<blockquote>".htmlentities(substr($line,2))."</blockquote>";
@@ -350,10 +366,25 @@ function gmi2html($capsule, $body, $lang, $urlgem, $favicon)
 	  '.@file_get_contents(__DIR__.'/style.css').'
 	  </style>
 	</head>
-	<body>
+	<body>';
+	if(count($tocs)>1)
+	{
+		$html.= '<div class="toc" role="navigation">
+		  <span class="icon">⚓</span>
+		  <ul>
+		  '.implode("\n",$tocs).'
+		  </ul>
+		</div>';
+	}
+	$html.= '
+	<label class="control">🔍 </label>
+	<input type="radio" name="check-size" class="control check-small" />
+	<input type="radio" name="check-size" class="control check-normal" checked="checked" />
+	<input type="radio" name="check-size" class="control check-big" />
 	<div class="main" role="article">
 	'.implode("\n",$lines).'
 	</div>
+	<div class="topanchor"><a href="#top">🔝</a></div>
 	<div class="gemini" role="banner">
 	<span>'.$favicon.'</span>
 	<a href="'.$urlgem.'" title="Gemini address">'.htmlentities($urlgem).'</a>
