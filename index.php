@@ -6,7 +6,7 @@
  * 
  * https://codeberg.org/adele.work/ergol-http
  * 
- * Version 0.4
+ * Version 0.4.1
  * 
  * ## Copyright 2021 Adële
  * 
@@ -326,13 +326,13 @@ function gmi2html($capsule, $body, $lang, $urlgem, $favicon)
 				$lev2++;
 				$lev3=0;
 				$levid = $lev1.'-'.$lev2;
-				$lines[] = '<h1 id="'.$levid.'">'.trim(htmlentities(substr($line,2))).'</h1>';
+				$lines[] = '<h2 id="'.$levid.'">'.trim(htmlentities(substr($line,2))).'</h2>';
 				$tocs[] = '<li class="l2"><a href="#'.$levid.'">'.trim(htmlentities(substr($line,2))).'</a></li>';
 				break;
 			case "###":
 				$lev3++;
 				$levid = $lev1.'-'.$lev2.'-'.$lev3;
-				$lines[] = '<h1 id="'.$levid.'">'.trim(htmlentities(substr($line,3))).'</h1>';
+				$lines[] = '<h3 id="'.$levid.'">'.trim(htmlentities(substr($line,3))).'</h3>';
 				$tocs[] = '<li class="l3"><a href="#'.$levid.'">'.trim(htmlentities(substr($line,3))).'</a></li>';
 				break;
 			case ">":
