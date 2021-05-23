@@ -344,7 +344,7 @@ function gmi2html($capsule, $body, $lang, $urlgem, $favicon)
 			case "=>":
 				$lines[]='<p>';
 				$link = explode(' ', substr($line,3), 2);
-				$lines[] = '<a href="'.str_replace('gemini://'.$capsule,$_SERVER["REQUEST_SCHEME"].'://'.$capsule, $link[0]).'">'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1])."</a>";
+				$lines[] = '<a href="'.str_replace('gemini://'.$capsule,isset($_SERVER["REQUEST_SCHEME"])?$_SERVER["REQUEST_SCHEME"]:"http".'://'.$capsule, $link[0]).'">'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1])."</a>";
 				if(strpos($link[0], '://')===false &&		 // relative image
 				   in_array(strtolower(substr($link[0],-4)),array('.jpg','.png','.gif','jpeg','webp')) )
 					$lines[] = ' 🖼️ <div class="inline-img"><img src="'.$link[0].'" alt="'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1]).'" /></div>';
