@@ -355,44 +355,10 @@ function gmi2html($capsule, $body, $lang, $urlgem, $favicon)
 				break;
 		}
 	}
-	$html = '<!DOCTYPE html>
-	<html xmlns="http://www.w3.org/1999/xhtml" lang="'.$lang.'">
-	<head>
-	  <meta charset="utf-8">
-	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	  <title>'.htmlentities($title.' | '.$urlgem).'</title>
-	  <link rel="alternate" href="'.$urlgem.'" type="text/gemini" title="Gemini protocol">
-	  <style media="screen">
-	  '.@file_get_contents(__DIR__.'/style.css').'
-	  </style>
-	</head>
-	<body id="top">';
-	if(count($tocs)>1)
-	{
-		$html.= '<div class="toc" role="navigation">
-		  <span class="icon">⚓</span>
-		  <ul>
-		  '.implode("\n",$tocs).'
-		  </ul>
-		</div>';
-	}
-	$html.= '
-	<label class="control" for="check-smaller">🔍 -</label>
-	<input type="radio" name="check-size" id="check-smaller" class="control check-smaller" />
-	<input type="radio" name="check-size" id="check-small" class="control check-small" />
-	<input type="radio" name="check-size" id="check-normal" class="control check-normal" checked="checked" />
-	<input type="radio" name="check-size" id="check-big" class="control check-big" />
-	<input type="radio" name="check-size" id="check-bigger" class="control check-bigger" />
-	<label class="control" for="check-bigger">+</label>
-	<div class="main" role="article">
-	'.implode("\n",$lines).'
-	</div>
-	<div class="topanchor"><a href="#top">🔝</a></div>
-	<div class="gemini" role="banner">
-	<span>'.$favicon.'</span>
-	<a href="'.$urlgem.'" title="Gemini address">'.htmlentities($urlgem).'</a>
-	</div>
-	</body>
-	</html>';
+	$style = file_get_contents(__DIR__.'/style.css');
+	ob_start();
+	include "template.php";
+	$html = ob_get_contents();
+	ob_end_clean();
 	return $html;
 }
