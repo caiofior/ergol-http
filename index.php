@@ -276,6 +276,15 @@ exit;
 
 function gmi2html($capsule, $body, $lang, $urlgem, $favicon)
 {
+	if(isset($_SERVER['REQUEST_SCHEME'])) {
+		$scheme = $_SERVER['REQUEST_SCHEME'];
+	}
+	else if(isset($_SERVER['HTTPS']) && !empty($_SERVER['HTTPS'])) {
+		$scheme = 'https';
+	}
+	else {
+		$scheme = 'http';
+	}
 	$title='';
 	$lines=array();
 	$tocs=array();
@@ -344,7 +353,7 @@ function gmi2html($capsule, $body, $lang, $urlgem, $favicon)
 			case "=>":
 				$lines[]='<p>';
 				$link = explode(' ', substr($line,3), 2);
-				$lines[] = '<a href="'.str_replace('gemini://'.$capsule,isset($_SERVER["REQUEST_SCHEME"])?$_SERVER["REQUEST_SCHEME"]:"http".'://'.$capsule, $link[0]).'">'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1])."</a>";
+				$lines[] = '<a href="'.str_replace('gemini://'.$capsule,$scheme.'://'.$capsule, $link[0]).'">'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1])."</a>";
 				if(strpos($link[0], '://')===false &&		 // relative image
 				   in_array(strtolower(substr($link[0],-4)),array('.jpg','.png','.gif','jpeg','webp')) )
 					$lines[] = ' 🖼️ <div class="inline-img"><img src="'.$link[0].'" alt="'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1]).'" /></div>';
