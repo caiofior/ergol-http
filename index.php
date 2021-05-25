@@ -42,17 +42,77 @@ if(isset($_GET['q']))
 else
 	$q = $_SERVER['REQUEST_URI'];
 // Loading config...
-$conf_filename = @realpath(ERGOL_JSON);
+$conf_filename = @realpath(CONFIG_PATH);
 
-$conf_json = file_get_contents($conf_filename);
-if($conf_json===false)
+$conf_content = file_get_contents($conf_filename);
+if($conf_content===false)
 	die("Unable to open file ".$conf_filename."\n");
 
-$conf_json = preg_replace('/[\x00-\x1F\x80-\xFF]/', '',$conf_json);
+if(CONFIG_TYPE === "ergol") {
+	$conf_content = preg_replace('/[\x00-\x1F\x80-\xFF]/', '',$conf_content);
 
-$conf = json_decode($conf_json);
-if($conf===null)
-	die("Unable to parse ".$conf_filename." : ".json_last_error_msg()."\n");
+	$conf = json_decode($conf_content);
+	if($conf===null)
+		die("Unable to parse ".$conf_filename." : ".json_last_error_msg()."\n");
+}
+else if(CONFIG_TYPE === "gemserv") {
+	//config to array of line
+	$gsConfigArray = explode("\n", $conf_content);
+
+	//replace all [[server]] by [server_X] (toml -> ini)
+	$nb = 0;
+	foreach($gsConfigArray as &$line) {
+		if($line === "[[server]]") {
+			$line = "[server_".$nb."]";
+			++$nb;
+		}
+	}
+
+	//reassemble file and parse as array
+	$gsConfig = implode("\n", $gsConfigArray);
+	$ini = parse_ini_string($gsConfig, true);
+
+	//create temp array to contain config and put general config values in it
+	$configTemp = array();
+	if(array_key_exists('port', $ini)) {
+		$configTemp["port"] = (int) $ini["port"];
+	}
+	else {
+		die('Unable to process '.CONFIG_PATH.': Missing value "port"');
+	}
+
+	//process for each capsule, from server_0 to server_$nb-1, put it in an array
+	$capsules = array();
+	for($i = 0; $i < $nb; ++$i) {
+		$key = "server_".$i;
+
+		//check that all required fields are present
+		if(array_key_exists('dir', $ini[$key]) && array_key_exists('hostname', $ini[$key]) && array_key_exists('hostname', $ini[$key])) {
+			//check absolute path
+			if($ini[$key]["dir"][0] == "/") {
+				$folder = $ini[$key]["dir"];
+			}
+			else {
+				$folder = "{here}/".$ini[$key]["dir"];
+			}
+			$capsules[$ini[$key]["hostname"]] = (object) array(
+				"folder" => $folder,
+				"lang" => $ini[$key]["lang"],
+				"lang_regex" => "/\.([a-z][a-z])\./",
+				"auto_index_ext" => array(".gmi"),
+				"redirect" => false
+			);
+		}
+	}
+	//convert capsules array to stdObj -> as in json_decode, and put it in config
+	$configTemp["capsules"] = (object) $capsules;
+
+	//convert array to stdObj -> as in json_decode
+	$conf = (object) $configTemp;
+}
+else {
+	die("Unknown config type: ".CONFIG_TYPE."\n");
+}
 
 foreach($conf->capsules as $hostname => $capsule)
 {
