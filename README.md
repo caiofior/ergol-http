@@ -8,8 +8,9 @@ It is a http wrapper written in php, working with ergol gemini server or standal
 ## Copyright
 
 authors:
-[Adële](https://adele.work/)
-[Romain de Laage](gemini://rdelaage.ovh/)
+
+* [Adële](https://adele.work/)
+* [Romain de Laage](gemini://rdelaage.ovh/)
 
 ergol-http is under MIT/X Consortium License
 
