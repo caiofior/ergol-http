@@ -10,7 +10,7 @@ It is a http wrapper written in php, working with ergol gemini server or standal
 authors:
 
 * [Adële](https://adele.work/)
-* [Romain de Laage](gemini://rdelaage.ovh/)
+* [Romain de Laage](https://rdelaage.ovh/)
 
 ergol-http is under MIT/X Consortium License
 
