@@ -56,7 +56,59 @@ if(CONFIG_TYPE === "ergol") {
 		die("Unable to parse ".$conf_filename." : ".json_last_error_msg()."\n");
 }
 else if(CONFIG_TYPE === "gemserv") {
-//here script for gemserv config type
+	//config to array of line
+	$gsConfigArray = explode("\n", $conf_content);
+
+	//replace all [[server]] by [server_X] (toml -> ini)
+	$nb = 0;
+	foreach($gsConfigArray as &$line) {
+		if($line === "[[server]]") {
+			$line = "[server_".$nb."]";
+			++$nb;
+		}
+	}
+
+	//reassemble file and parse as array
+	$gsConfig = implode("\n", $gsConfigArray);
+	$ini = parse_ini_string($gsConfig, true);
+
+	//create temp array to contain config and put general config values in it
+	$configTemp = array();
+	if(array_key_exists('port', $ini)) {
+		$configTemp["port"] = (int) $ini["port"];
+	}
+	else {
+		die('Unable to process '.CONFIG_PATH.': Missing value "port"');
+	}
+
+	//process for each capsule, from server_0 to server_$nb-1, put it in an array
+	$capsules = array();
+	for($i = 0; $i < $nb; ++$i) {
+		$key = "server_".$i;
+
+		//check that all required fields are present
+		if(array_key_exists('dir', $ini[$key]) && array_key_exists('hostname', $ini[$key]) && array_key_exists('hostname', $ini[$key])) {
+			//check absolute path
+			if($ini[$key]["dir"][0] == "/") {
+				$folder = $ini[$key]["dir"];
+			}
+			else {
+				$folder = "{here}/".$ini[$key]["dir"];
+			}
+			$capsules[$ini[$key]["hostname"]] = (object) array(
+				"folder" => $folder,
+				"lang" => $ini[$key]["lang"],
+				"lang_regex" => "/\.([a-z][a-z])\./",
+				"auto_index_ext" => array(".gmi"),
+				"redirect" => false
+			);
+		}
+	}
+	//convert capsules array to stdObj -> as in json_decode, and put it in config
+	$configTemp["capsules"] = (object) $capsules;
+
+	//convert array to stdObj -> as in json_decode
+	$conf = (object) $configTemp;
 }
 else {
 	die("Unknown config type: ".CONFIG_TYPE."\n");
