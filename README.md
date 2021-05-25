@@ -7,7 +7,9 @@ It is a http wrapper written in php, working with ergol gemini server or standal
 
 ## Copyright
 
-author : [Adële](https://adele.work/)
+authors:
+[Adële](https://adele.work/)
+[Romain de Laage](gemini://rdelaage.ovh/)
 
 ergol-http is under MIT/X Consortium License
 
