@@ -42,17 +42,25 @@ if(isset($_GET['q']))
 else
 	$q = $_SERVER['REQUEST_URI'];
 // Loading config...
-$conf_filename = @realpath(ERGOL_JSON);
+$conf_filename = @realpath(CONFIG_PATH);
 
-$conf_json = file_get_contents($conf_filename);
-if($conf_json===false)
+$conf_content = file_get_contents($conf_filename);
+if($conf_content===false)
 	die("Unable to open file ".$conf_filename."\n");
 
-$conf_json = preg_replace('/[\x00-\x1F\x80-\xFF]/', '',$conf_json);
+if(CONFIG_TYPE === "ergol") {
+	$conf_content = preg_replace('/[\x00-\x1F\x80-\xFF]/', '',$conf_content);
 
-$conf = json_decode($conf_json);
-if($conf===null)
-	die("Unable to parse ".$conf_filename." : ".json_last_error_msg()."\n");
+	$conf = json_decode($conf_content);
+	if($conf===null)
+		die("Unable to parse ".$conf_filename." : ".json_last_error_msg()."\n");
+}
+else if(CONFIG_TYPE === "gemserv") {
+//here script for gemserv config type
+}
+else {
+	die("Unknown config type: ".CONFIG_TYPE."\n");
+}
 
 foreach($conf->capsules as $hostname => $capsule)
 {
