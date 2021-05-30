@@ -37,10 +37,6 @@ error_reporting(E_ALL);
 
 require(__DIR__.'/config.php');
 
-if(isset($_GET['q']))
-	$q = $_GET['q'];
-else
-	$q = $_SERVER['REQUEST_URI'];
 // Loading config...
 $conf_filename = @realpath(CONFIG_PATH);
 
@@ -134,6 +130,26 @@ else
 $response = false;
 $response_code = 0;
 $body = false;
+
+if(isset($_GET['qx']))
+{
+	$response = "OK";
+	$body = "# You are following a Gemini link to another server
+
+You can't access all the Geminispace with this proxy. If you want to follow this link, you have to install ans use a Gemini client.
+
+You asked to follow :
+```gemini-url
+".urldecode($_GET['qx'])."
+```";
+	$mime="text/html";
+	$body=gmi2html($capsule, $body, 'en', $_GET['qx'], '');
+}
+
+if(isset($_GET['q']))
+	$q = $_GET['q'];
+else
+	$q = $_SERVER['REQUEST_URI'];
 
 if($response === false && !isset($conf->capsules->$capsule))
 {
@@ -413,7 +429,15 @@ function gmi2html($capsule, $body, $lang, $urlgem, $favicon)
 			case "=>":
 				$lines[]='<p>';
 				$link = explode(' ', substr($line,3), 2);
-				$lines[] = '<a href="'.str_replace('gemini://'.$capsule,$scheme.'://'.$capsule, $link[0]).'">'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1])."</a>";
+				if(str_starts_with($link[0], 'gemini://'.$capsule)) {
+					$lines[] = '<a href="'.str_replace('gemini://'.$capsule,$scheme.'://'.$_SERVER['HTTP_HOST'], $link[0]).'">'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1])."</a>";
+				}
+				else if(str_starts_with($link[0], 'gemini://')) {
+					$lines[] = '<a href="/?qx='.urlencode($link[0]).'">'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1])."</a>";
+				}
+				else {
+					$lines[] = '<a href="'.$link[0].'">'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1])."</a>";
+				}
 				if(strpos($link[0], '://')===false &&		 // relative image
 				   in_array(strtolower(substr($link[0],-4)),array('.jpg','.png','.gif','jpeg','webp')) )
 					$lines[] = ' 🖼️ <div class="inline-img"><img src="'.$link[0].'" alt="'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1]).'" /></div>';
