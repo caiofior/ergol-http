@@ -62,6 +62,10 @@ else if(CONFIG_TYPE === "gemserv") {
 			$line = "[server_".$nb."]";
 			++$nb;
 		}
+		// comment lines with ;
+		if(substr($line,0,1)=='#')
+			$line = "; ".$line;
+
 	}
 
 	//reassemble file and parse as array
