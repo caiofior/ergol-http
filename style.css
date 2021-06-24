@@ -1,43 +1,46 @@
 body {
 	margin: 0;
 	padding: 80px 0;
-	font-family: Serif;
+	font-family: Verdana, Sans-Serif;
 } 
 div.main {
 	margin: 0px auto;
 	padding: 16px;
 	max-width: 1152px;
-	border: 1px solid #ccc;
-	box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, .1);;
 } 
 pre {
-	background: #eee;
+	font-family: Monaco, Courier, monospace;
+	background: #000;
+	color: #3c3;
 	padding: 16px;
 	margin: 16px 0;
 	overflow-x: auto;
-	box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, .1);
+	border-radius: 8px;
 }
 li {
 	margin-left: 16px;
 }
 p {
 	margin: 8px 0;
-	font-family: Sans-Serif;
+}
+a {
+	color: #009;
+	text-decoration: none;
 }
 blockquote {
-	background: #fdfdec;
+	background: #eee;
 	padding: 8px 16px;
-	margin: 0;
+	margin: 0 0 0 8px;
+	border-radius: 8px;
 }
 div.toc {
 	float: right;
-	margin: 16px;
+	margin: 0 16px;
 	padding: 0;
 	max-width: 256px;
-	border: 1px solid #ccc;
-	box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, .1);;
-	background: #fff;
-	font-family: Sans-Serif;
+	background: #000;
+	color: #3c3;
+	border-radius: 8px;
 }
 @media screen and (max-width: 728px) {
 	div.toc {
@@ -47,12 +50,12 @@ div.toc {
 		max-width: 728px;
 	}
 }
-div.toc .icon {
-	float: left;
-	margin: 4px 0;
-}
 div.toc ul {
 	margin: 8px;
+}
+div.toc a {
+	color: #3c3;
+	text-decoration: none;
 }
 div.toc .l1  {
 	margin-left: 0px;
@@ -104,12 +107,12 @@ div.gemini {
 	left: 0;
 	width: 100%;
 	padding: 8px 0;
-	font-family: monospace;
+	font-family: Monaco, Courier, monospace;
 	font-size: 120%;
 	background: #000;
 }
 div.gemini a {
-	color: #3f3;
+	color: #3c3;
 	text-decoration: none;
 	word-break: break-all;
 }
@@ -117,4 +120,19 @@ div.gemini span {
 	color: #fff;
 	font-size: 150%;
 	margin-left: 16px;
+}
+
+
+@media (prefers-color-scheme: dark) {
+	body {
+		color: #eee;
+		background: #333;
+	}
+	a {
+		color: #99f;
+	}
+	blockquote {
+		color: #fff;
+		background: #666;
+	}
 }

@@ -14,7 +14,6 @@
 		{
 		?>
 		<div class="toc" role="navigation">
-			<span class="icon">⚓</span>
 			<ul>
 				<?php echo implode("\n",$tocs); ?>
 			</ul>
@@ -22,7 +21,7 @@
 		<?php
 		}
 		?>
-		<label class="control" for="check-smaller">🔍 -</label>
+		<label class="control" for="check-smaller">-</label>
 		<input type="radio" name="check-size" id="check-smaller" class="control check-smaller" />
 		<input type="radio" name="check-size" id="check-small" class="control check-small" />
 		<input type="radio" name="check-size" id="check-normal" class="control check-normal" checked="checked" />
@@ -32,7 +31,7 @@
 		<div class="main" role="article">
 			<?php echo implode("\n",$lines); ?>
 		</div>
-		<div class="topanchor"><a href="#top">🔝</a></div>
+		<div class="topanchor"><a href="#top">^</a></div>
 		<div class="gemini" role="banner">
 			<span><?php echo $favicon; ?></span>
 			<a href="<?php echo $urlgem; ?>" title="Gemini address"><?php echo htmlentities($urlgem); ?></a>
