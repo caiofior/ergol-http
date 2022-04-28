@@ -131,6 +131,8 @@ if(strpos($_SERVER['HTTP_HOST'],':')!==false)
 else
 	$capsule = strtolower($_SERVER['HTTP_HOST']);
 
+$whitelist_domains = explode("\n", file_get_contents(WHITELIST_DOMAINS_PATH));
+
 $response = false;
 $response_code = 0;
 $body = false;
@@ -356,6 +358,7 @@ exit;
 
 function gmi2html($capsule, $body, $lang, $urlgem, $favicon)
 {
+	global $whitelist_domains;
 	if(isset($_SERVER['REQUEST_SCHEME'])) {
 		$scheme = $_SERVER['REQUEST_SCHEME'];
 	}
@@ -437,7 +440,12 @@ function gmi2html($capsule, $body, $lang, $urlgem, $favicon)
 					$lines[] = '<a href="'.str_replace('gemini://'.$capsule,$scheme.'://'.$_SERVER['HTTP_HOST'], $link[0]).'">'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1])."</a>";
 				}
 				else if(str_starts_with($link[0], 'gemini://')) {
-					$lines[] = '<a href="/?qx='.urlencode($link[0]).'">'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1])."</a>";
+					$link_domain = parse_url($link[0], PHP_URL_HOST);
+					if(in_array($link_domain, $whitelist_domains))
+						$link_href = str_replace('gemini://','http://',$link[0]);
+					else
+						$link_href = '/?qx='.urlencode($link[0]);
+					$lines[] = '<a href="'.$link_href.'">'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1])."</a>";
 				}
 				else {
 					$lines[] = '<a href="'.$link[0].'">'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1])."</a>";
