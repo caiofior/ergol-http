@@ -114,8 +114,19 @@ else {
 	die("Unknown config type: ".CONFIG_TYPE."\n");
 }
 
+if(defined('WHITELIST_DOMAINS_PATH'))
+{
+	$whitelist_domains_file_content = file_get_contents(WHITELIST_DOMAINS_PATH);
+	if($whitelist_domains_file_content===false)
+		die("Unable to open file ".WHITELIST_DOMAINS_PATH."\n");
+
+	$whitelist_domains = explode("\n", $whitelist_domains_file_content);
+}
+
 foreach($conf->capsules as $hostname => $capsule)
 {
+	$whitelist_domains[] = $hostname;
+
 	if(empty($conf->capsules->$hostname->redirect))
 	{
 		$conf->capsules->$hostname->folder = str_replace("{here}",dirname($conf_filename),$capsule->folder);
@@ -130,8 +141,6 @@ if(strpos($_SERVER['HTTP_HOST'],':')!==false)
 	$capsule = strtolower(substr($_SERVER['HTTP_HOST'], 0, strpos($_SERVER['HTTP_HOST'],':')));
 else
 	$capsule = strtolower($_SERVER['HTTP_HOST']);
-
-$whitelist_domains = explode("\n", file_get_contents(WHITELIST_DOMAINS_PATH));
 
 $response = false;
 $response_code = 0;
