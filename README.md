@@ -54,3 +54,8 @@ php -S 0.0.0.0:8080 -t ./ ./index.php
 
 Get the last version the same way as installation but do not overwrite your config.php, check if there are new constants in config-sample.php and add them into your config.php.
 
+## Jetforce version
+
+This version is adapted fot gemini jetforce server and php 7.4
+
+https://github.com/michael-lazar/jetforce

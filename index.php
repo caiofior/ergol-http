@@ -30,117 +30,32 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  */
-
+if (!function_exists('str_starts_with'))
+{
+    function str_starts_with($haystack, $needle)
+    {
+        return (string)$needle !== '' && strncmp($haystack, $needle, strlen($needle)) === 0;
+    }
+}
+if (!function_exists('str_ends_with'))
+{
+    function str_ends_with($haystack, $needle)
+    {
+        return $needle !== '' && substr($haystack, -strlen($needle)) === (string)$needle;
+    }
+}
+if (!function_exists('str_contains'))
+{
+    function str_contains($haystack, $needle)
+    {
+        return $needle !== '' && mb_strpos($haystack, $needle) !== false;
+    }
+}
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 require(__DIR__.'/config.php');
-
-// Loading config...
-$conf_filename = @realpath(CONFIG_PATH);
-
-$conf_content = file_get_contents($conf_filename);
-if($conf_content===false)
-	die("Unable to open file ".$conf_filename."\n");
-
-if(CONFIG_TYPE === "ergol") {
-	$conf_content = preg_replace('/[\x00-\x1F\x80-\xFF]/', '',$conf_content);
-
-	$conf = json_decode($conf_content);
-	if($conf===null)
-		die("Unable to parse ".$conf_filename." : ".json_last_error_msg()."\n");
-}
-else if(CONFIG_TYPE === "gemserv") {
-	//config to array of line
-	$gsConfigArray = explode("\n", $conf_content);
-
-	//replace all [[server]] by [server_X] (toml -> ini)
-	$nb = 0;
-	foreach($gsConfigArray as &$line) {
-		if($line === "[[server]]") {
-			$line = "[server_".$nb."]";
-			++$nb;
-		}
-		// comment lines with ;
-		if(substr($line,0,1)=='#')
-			$line = "; ".$line;
-
-	}
-
-	//reassemble file and parse as array
-	$gsConfig = implode("\n", $gsConfigArray);
-	$ini = parse_ini_string($gsConfig, true);
-
-	//create temp array to contain config and put general config values in it
-	$configTemp = array();
-	if(array_key_exists('port', $ini)) {
-		$configTemp["port"] = (int) $ini["port"];
-	}
-	else {
-		die('Unable to process '.CONFIG_PATH.': Missing value "port"');
-	}
-
-	//process for each capsule, from server_0 to server_$nb-1, put it in an array
-	$capsules = array();
-	for($i = 0; $i < $nb; ++$i) {
-		$key = "server_".$i;
-
-		//check that all required fields are present
-		if(array_key_exists('dir', $ini[$key]) && array_key_exists('hostname', $ini[$key]) && array_key_exists('hostname', $ini[$key])) {
-			//check absolute path
-			if($ini[$key]["dir"][0] == "/") {
-				$folder = $ini[$key]["dir"];
-			}
-			else {
-				$folder = "{here}/".$ini[$key]["dir"];
-			}
-			$capsules[$ini[$key]["hostname"]] = (object) array(
-				"folder" => $folder,
-				"lang" => $ini[$key]["lang"],
-				"lang_regex" => "/\.([a-z][a-z])\./",
-				"auto_index_ext" => array(".gmi"),
-				"redirect" => false
-			);
-		}
-	}
-	//convert capsules array to stdObj -> as in json_decode, and put it in config
-	$configTemp["capsules"] = (object) $capsules;
-
-	//convert array to stdObj -> as in json_decode
-	$conf = (object) $configTemp;
-}
-else {
-	die("Unknown config type: ".CONFIG_TYPE."\n");
-}
-
-if(defined('WHITELIST_DOMAINS_PATH'))
-{
-	$whitelist_domains_file_content = file_get_contents(WHITELIST_DOMAINS_PATH);
-	if($whitelist_domains_file_content===false)
-		die("Unable to open file ".WHITELIST_DOMAINS_PATH."\n");
-
-	$whitelist_domains = explode("\n", $whitelist_domains_file_content);
-}
-
-foreach($conf->capsules as $hostname => $capsule)
-{
-	$whitelist_domains[] = $hostname;
-
-	if(empty($conf->capsules->$hostname->redirect))
-	{
-		$conf->capsules->$hostname->folder = str_replace("{here}",dirname($conf_filename),$capsule->folder);
-	}
-	else
-	{
-		unset($conf->capsules->$hostname->folder);
-	}
-}
-
-if(strpos($_SERVER['HTTP_HOST'],':')!==false)
-	$capsule = strtolower(substr($_SERVER['HTTP_HOST'], 0, strpos($_SERVER['HTTP_HOST'],':')));
-else
-	$capsule = strtolower($_SERVER['HTTP_HOST']);
 
 $response = false;
 $response_code = 0;
@@ -164,40 +79,15 @@ You asked to follow :
 if(isset($_GET['q']))
 	$q = $_GET['q'];
 else
-	$q = $_SERVER['REQUEST_URI'];
+	$q = 'index.gmi';
 
-if($response === false && !isset($conf->capsules->$capsule))
-{
-	$response = "HTTP/1.1 400 BAD REQUEST";
-	$response_code = 0;
-}
-
-if($response === false && strpos(str_replace("\\",'/',rawurldecode($q)),'/..')!==false)
-{
-	$response = "HTTP/1.1 400 BAD REQUEST";
-	$response_code = 0;
-}
-
-if(!empty($conf->capsules->$capsule->redirect))
-{
-	// redirect to another capsule
-	$response = "Location: ".str_replace('gemini://','http://',$conf->capsules->$capsule->redirect.$q);
-	$response_code = 302;
-}
-elseif($response === false)
+if($response === false)
 {
 	// search requested file
-	$filename = $conf->capsules->$capsule->folder.rawurldecode($q);
-	$lang = $conf->capsules->$capsule->lang;
-	if(!empty($conf->capsules->$capsule->lang_regex))
-	{
-		// search lang code in requested path (ex: file.fr.gmi)
-		preg_match($conf->capsules->$capsule->lang_regex, rawurldecode($q), $matches);
-		if(isset($matches[1]))
-			$lang = strtolower($matches[1]);
-	}
+	$filename = GEMINI_PATH.rawurldecode($q);
+	$lang = GEMINI_LANG;
 	// search favicon
-	$favicon = @file_get_contents($conf->capsules->$capsule->folder.'/favicon.txt');
+	$favicon = @file_get_contents(GEMINI_PATH.'/favicon.txt');
 	$favicon = mb_substr(trim($favicon),0,1);
 }
 
@@ -232,7 +122,6 @@ if($response === false && file_exists($filename))
 {
 	if($response === false && is_file($filename))
 	{
-		
 		$mime = mime_content_type($filename);
 		if($mime == "text/plain")
 		{
@@ -248,22 +137,14 @@ if($response === false && file_exists($filename))
 		if($mime=="text/gemini")
 		{
 			$mime="text/html";
-			$body=gmi2html($capsule, $body, $lang,
-				'gemini://'.$capsule.($conf->port==1965?'':(':'.$conf->port)).$q,
+			$body=gmi2html('', $body, $lang,
+				'gemini://'.$q,
 				$favicon);
 		}
 	}
 	
 	if($response === false && is_dir($filename))
 	{
-		// if path is a directory name redirect into it
-		if(substr($filename,-1)!='/')
-		{
-			$response = "Location: ".$q."/";
-			$response_code = 302;
-		}
-		else
-		{
 			$mime = "text/html";
 			if(file_exists($filename.'/index.gmi'))
 			{
@@ -271,15 +152,14 @@ if($response === false && file_exists($filename))
 				$response = "OK";
 				$filename = $filename.'/index.gmi';
 				$body = file_get_contents($filename);
-				$body = gmi2html($capsule, $body, $lang,
-					'gemini://'.$capsule.($conf->port==1965?'':(':'.$conf->port)).$q,
+				$body = gmi2html('', $body, $lang,
+					'gemini://'.$q,
 					$favicon);
-			}
-			elseif(is_array($conf->capsules->$capsule->auto_index_ext))
-			{
+			} else {
+			
 				// build auto index
 				$response = "OK";
-				$body = "# ".$capsule." ".basename($filename)."\r\n";
+				$body = "# ".basename($filename)."\r\n";
 				$body .= "=> ../ [..]\r\n";
 				// three blocks
 				$items_dir=array(); // sub directories
@@ -293,18 +173,7 @@ if($response === false && file_exists($filename))
 						// dir itself
 						continue;
 					}
-					if(is_dir($filename.'/'.$entry) &&
-						!in_array('/', $conf->capsules->$capsule->auto_index_ext))
-					{
-						// folder ext "/" not in auto_index conf
-						continue;
-					}
-					if(is_file($filename.'/'.$entry) &&
-						!in_array(substr($entry,strrpos($entry,'.')), $conf->capsules->$capsule->auto_index_ext))
-					{
-						// ext not in auto_index conf
-						continue;
-					}						$link_name = $entry;
+                                        $link_name = $entry;
 					if(substr($entry,-4)=='.gmi')
 					{
 						// build feed for subscriptions for .gmi files,
@@ -339,11 +208,11 @@ if($response === false && file_exists($filename))
 					$body .= implode("\r\n", $items_gmi)."\r\n";
 				if(count($items_oth)>0)
 					$body .= implode("\r\n", $items_oth)."\r\n";
-				$body = gmi2html($capsule, $body, $lang,
-					'gemini://'.$capsule.($conf->port==1965?'':(':'.$conf->port)).$q,
+				$body = gmi2html('', $body, $lang,
+					'gemini://'.$q,
 					$favicon);
-			}
-		}
+                        }
+
 	}
 }
 
@@ -445,23 +314,31 @@ function gmi2html($capsule, $body, $lang, $urlgem, $favicon)
 			case "=>":
 				$lines[]='<p>';
 				$link = explode(' ', substr($line,3), 2);
-				if(str_starts_with($link[0], 'gemini://'.$capsule)) {
-					$lines[] = '<a href="'.str_replace('gemini://'.$capsule,$scheme.'://'.$_SERVER['HTTP_HOST'], $link[0]).'">'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1])."</a>";
-				}
-				else if(str_starts_with($link[0], 'gemini://')) {
+				if(!str_starts_with($link[0], 'http'))
+                                {
 					$link_domain = parse_url($link[0], PHP_URL_HOST);
-					if(in_array($link_domain, $whitelist_domains))
-						$link_href = str_replace('gemini://','http://',$link[0]);
-					else
-						$link_href = '/?qx='.urlencode($link[0]);
+                                        $urlPrefix = $scheme.'://'.$_SERVER['SERVER_NAME'];
+                                        $urlPrefix .= preg_replace('/\/index\.php\?.*/','',($_SERVER['REQUEST_URI']??''));
+                                        $link_href = $urlPrefix.'/index.php?q=';
+					if (
+	    				($_REQUEST['q']??'') != '' &&
+	    				!str_ends_with(($_REQUEST['q']??''),'.gmi')
+					)
+                                        {
+					    $link_href .= urlencode(($_REQUEST['q']??'').'/');
+                                        } elseif (str_contains(($_REQUEST['q']??''),'/')) {
+                                            $link_href .= urlencode(preg_replace('/\/(?!.*\/).*/','/',($_REQUEST['q']??'')));
+                                        }
+					$link_href .= urlencode($link[0]);
 					$lines[] = '<a href="'.$link_href.'">'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1])."</a>";
 				}
-				else {
+				else
+                                {
 					$lines[] = '<a href="'.$link[0].'">'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1])."</a>";
 				}
 				if(strpos($link[0], '://')===false &&		 // relative image
 				   in_array(strtolower(substr($link[0],-4)),array('.jpg','.png','.gif','jpeg','webp')) )
-					$lines[] = ' 🖼️ <div class="inline-img"><img src="'.$link[0].'" alt="'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1]).'" /></div>';
+					$lines[] = ' 🖼️ <div class="inline-img"><img src="'.$link_href.'" alt="'.htmlentities(empty($link[1])?rawurldecode($link[0]):$link[1]).'" /></div>';
 				$lines[]='</p>';
 				break;
 			default:
